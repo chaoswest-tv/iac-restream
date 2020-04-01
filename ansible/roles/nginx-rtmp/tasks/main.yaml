@@ -1,0 +1,93 @@
+---
+- name: install nginx-rtmp packages
+  become: yes
+  package:
+    name:
+      - nginx
+      - libnginx-mod-rtmp
+
+- name: copy static files
+  become: yes
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: "{{ item.owner | default('root') }}"
+    group: "{{ item.group | default('root') }}"
+    mode: "{{ item.mode | default('0644') }}"
+  loop:
+    - src: stats.xsl
+      dest: /etc/nginx/stats.xsl
+
+- name: prepare directories
+  become: yes
+  file:
+    state: directory
+    path: "{{ item.path }}"
+    owner: "{{ item.owner | default('root') }}"
+    group: "{{ item.group | default('root') }}"
+  loop:
+    - path: /var/www/well-known
+    - path: /etc/nginx/rtmp-available
+    - path: /etc/nginx/rtmp-enabled
+
+- name: check for required TLS certificates
+  stat:
+    path: /etc/letsencrypt/live/{{ inventory_hostname }}/cert.pem
+    follow: yes
+  register: tlscert
+
+- name: compile site configs
+  become: yes
+  notify: reload-nginx
+  template:
+    src: "sites/{{ item }}.j2"
+    dest: "/etc/nginx/sites-available/{{ item }}"
+    owner: root
+    group: root
+    mode: 0644
+  loop:
+    - rtmp-server
+
+- name: compile base nginx config
+  become: yes
+  notify: reload-nginx
+  template:
+    src: nginx.conf.j2
+    dest: /etc/nginx/nginx.conf
+    owner: root
+    group: root
+    mode: 0644
+
+# TODO: INSERT CERTIFICATE GENERATION HERE!
+
+- name: compile rtmp configs
+  become: yes
+  notify: reload-nginx
+  template:
+    src: "rtmp/{{ item }}.j2"
+    dest: "/etc/nginx/rtmp-available/{{ item }}"
+    owner: root
+    group: root
+    mode: 0644
+  loop:
+    - application
+
+- name: enable site configs
+  become: yes
+  notify: reload-nginx
+  file:
+    src: "/etc/nginx/sites-available/{{ item }}"
+    dest: "/etc/nginx/sites-enabled/{{ item }}"
+    state: link
+  loop:
+    - rtmp-server
+
+- name: enable rtmp configs
+  become: yes
+  notify: reload-nginx
+  file:
+    src: "/etc/nginx/rtmp-available/{{ item }}"
+    dest: "/etc/nginx/rtmp-enabled/{{ item }}"
+    state: link
+  loop:
+    - application

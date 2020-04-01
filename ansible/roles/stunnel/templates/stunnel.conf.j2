@@ -1,0 +1,16 @@
+setuid = stunnel4
+setgid = stunnel4
+pid = /tmp/stunnel.pid
+output = /var/log/stunnel4/stunnel.log
+
+[fb-live]
+client = yes
+accept = 127.0.0.1:19350
+connect = live-api-s.facebook.com:443
+verifyChain = no
+
+[ig-live]
+client = yes
+accept = 127.0.0.1:19351
+connect = live-upload.instagram.com:443
+verifyChain = no

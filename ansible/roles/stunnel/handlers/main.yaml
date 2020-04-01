@@ -1,0 +1,6 @@
+---
+- name: restart-stunnel
+  become: yes
+  service:
+    name: stunnel4
+    state: restarted

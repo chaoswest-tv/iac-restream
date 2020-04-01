@@ -1,0 +1,23 @@
+---
+- name: install stunnel
+  become: yes
+  package:
+    name: stunnel
+    state: present
+
+- name: enable and start stunnel
+  become: yes
+  service:
+    name: stunnel4
+    state: started
+    enabled: yes
+
+- name: compile stunnel config
+  become: yes
+  notify: restart-stunnel
+  template:
+    src: stunnel.conf.j2
+    dest: /etc/stunnel/stunnel.conf
+    owner: root
+    group: root
+    mode: 06444

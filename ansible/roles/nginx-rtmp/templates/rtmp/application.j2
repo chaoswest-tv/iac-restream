@@ -1,0 +1,22 @@
+application eivietheijiChohthohWei9ahgae6ooT {
+    live on;
+    record off;
+    on_publish http://localhost/on_publish;
+    hls on;
+    hls_path /tmp/hls;
+    hls_fragment    1;
+    hls_playlist_length     20;
+    {% for target in target_configs %}
+    # {{ target.description }}
+    {% if target.service == "twitch" %}
+    push rtmp://live.twitch.tv/app/{{ target.streamkey }};
+    {% endif %}
+    {% if target.service == "facebook" %}
+    push rtmp://127.0.0.1:19350/rtmp/{{ target.streamkey }};
+    {% endif %}
+    {% if target.service == "youtube" %}
+    push rtmp://a.rtmp.youtube.com/live2/{{ target.streamkey }};
+    push rtmp://b.rtmp.youtube.com/live2/{{ target.streamkey }}?backup=1;
+    {% endif %}
+    {% endfor %}
+}

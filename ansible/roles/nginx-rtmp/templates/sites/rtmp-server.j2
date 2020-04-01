@@ -1,0 +1,45 @@
+    server {
+        listen          443 http2;
+        listen          [::]:443 http2;
+        ssl             on;
+        server_name     {{ inventory_hostname }};
+
+ 	      ssl_certificate /etc/letsencrypt/live/{{ inventory_hostname }}/fullchain.pem;
+    	  ssl_certificate_key /etc/letsencrypt/live/{{ inventory_hostname }}/privkey.pem;
+
+        error_page  500 502 503 504 /50x.html;
+
+        auth_basic           "Restricted access.";
+        auth_basic_user_file /etc/nginx/htpasswd;
+
+        location /hls {
+            types {
+                application/vnd.apple.mpegurl m3u8;
+                video/mp2ts ts;
+            }
+            root /tmp;
+            add_header  Cache-Control no-cache;
+            add_header  Access-Control-Allow-Origin *;
+        }
+
+        location /on_publish {
+            return  201;
+        }
+
+        location /stats {
+            rtmp_stat all;
+            rtmp_stat_stylesheet stats.xsl;
+        }
+
+        location /stats.xsl {
+            alias /etc/nginx/stats.xsl;
+        }
+
+        location /control {
+            rtmp_control all;
+        }
+
+        location = /50x.html {
+            root html;
+        }
+    }

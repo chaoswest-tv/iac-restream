@@ -1,0 +1,5 @@
+---
+- hosts: restream
+  roles:
+    - stunnel
+    - nginx-rtmp

@@ -1,0 +1,14 @@
+---
+target_configs:
+  - service: twitch
+    description: allefarben_official
+    streamkey: "{{ target_twitch_allefarben_official_streamkey_vault }}"
+  - service: youtube
+    description: sms
+    streamkey: "{{ target_youtube_sms_streamkey_vault }}"
+  - service: youtube
+    description: alle farben
+    streamkey: "{{ target_youtube_allefarben_streamkey_vault }}"
+  - service: facebook
+    description: alle farben
+    streamkey: "{{ target_facebook_allefarben_streamkey_vault }}"
